@@ -1,8 +1,4 @@
-"""
-Developer: Jayani (US-002)
-Story: Integrate Upload UI with Backend API
-Purpose: To verify that the upload endpoint (/predict) is reachable and returns a valid response.
-"""
+
 
 import io
 from backend.app import app

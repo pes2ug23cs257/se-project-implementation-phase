@@ -1,5 +1,5 @@
 
-
+// script.js
 document.getElementById('uploadBtn').addEventListener('click', async () => {
   const input = document.getElementById('imageInput');
   const result = document.getElementById('result');
