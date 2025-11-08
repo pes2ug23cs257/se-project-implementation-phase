@@ -1,10 +1,25 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 import os
 
 app = Flask(__name__)
 
-@app.route("/predict", methods=["POST"])
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
+@app.route("/predict", methods=["POST", "OPTIONS"])  # Add OPTIONS method
 def predict():
+    # Handle preflight request
+    if request.method == "OPTIONS":
+        response = make_response()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add('Access-Control-Allow-Headers', "*")
+        response.headers.add('Access-Control-Allow-Methods', "*")
+        return response
+    
     # Get file from request
     file = request.files.get("file")
     if not file:
