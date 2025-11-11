@@ -1,0 +1,19 @@
+************* Module app
+backend\app.py:33:0: C0303: Trailing whitespace (trailing-whitespace)
+backend\app.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+backend\app.py:1:0: E0401: Unable to import 'flask' (import-error)
+backend\app.py:5:0: C0116: Missing function or method docstring (missing-function-docstring)
+backend\app.py:12:0: E0401: Unable to import 'flask' (import-error)
+backend\app.py:12:0: W0404: Reimport 'Flask' (imported line 1) (reimported)
+backend\app.py:12:0: W0404: Reimport 'jsonify' (imported line 1) (reimported)
+backend\app.py:12:0: W0404: Reimport 'request' (imported line 1) (reimported)
+backend\app.py:12:0: C0413: Import "from flask import Flask, jsonify, request, make_response" should be placed at the top of the module (wrong-import-position)
+backend\app.py:13:0: C0413: Import "import os" should be placed at the top of the module (wrong-import-position)
+backend\app.py:18:0: C0116: Missing function or method docstring (missing-function-docstring)
+backend\app.py:25:0: C0116: Missing function or method docstring (missing-function-docstring)
+backend\app.py:25:0: E0102: function already defined line 5 (function-redefined)
+backend\app.py:13:0: C0411: standard import "os" should be placed before third party imports "flask.Flask", "flask.Flask" (wrong-import-order)
+
+-----------------------------------
+Your code has been rated at 1.88/10
+

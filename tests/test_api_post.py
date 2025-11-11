@@ -1,17 +1,12 @@
-import io
+import io, json, os
 from backend.app import app
 
-def test_predict_post():
+def test_predict_endpoint_returns_json():
     client = app.test_client()
-
-    # Create a dummy file to simulate real upload
-    data = {
-        "file": (io.BytesIO(b"fake image data"), "test.jpg")
-    }
-
-    resp = client.post("/predict", data=data, content_type='multipart/form-data')
-
-    assert resp.status_code == 200
-    result = resp.get_json()
-    assert "label" in result
-    assert "confidence" in result
+    fpath = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
+    with open(fpath, "rb") as f:
+        data = {"file": (io.BytesIO(f.read()), "index.html")}
+        resp = client.post("/predict", data=data, content_type="multipart/form-data")
+        body = json.loads(resp.data)
+        assert resp.status_code == 200
+        assert "label" in body and "confidence" in body
