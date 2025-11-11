@@ -1,0 +1,32 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.0, pytest-9.0.0, pluggy-1.6.0 -- C:\Users\Dhanusha\se-project-implementation-phase\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Dhanusha\se-project-implementation-phase
+collecting ... collected 1 item / 2 errors
+
+=================================== ERRORS ====================================
+___________________ ERROR collecting tests/test_api_post.py ___________________
+ImportError while importing test module 'C:\Users\Dhanusha\se-project-implementation-phase\tests\test_api_post.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Program Files\Python313\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_api_post.py:2: in <module>
+    from backend.app import app
+E   ModuleNotFoundError: No module named 'backend'
+__________________ ERROR collecting tests/test_upload_ui.py ___________________
+ImportError while importing test module 'C:\Users\Dhanusha\se-project-implementation-phase\tests\test_upload_ui.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Program Files\Python313\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_upload_ui.py:8: in <module>
+    from backend.app import app
+E   ModuleNotFoundError: No module named 'backend'
+=========================== short test summary info ===========================
+ERROR tests/test_api_post.py
+ERROR tests/test_upload_ui.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+============================== 2 errors in 0.31s ==============================
