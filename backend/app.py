@@ -1,30 +1,27 @@
-from flask import Flask, jsonify, request
-import os
+"""Flask backend for traffic sign recognition mock API."""
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
-@app.route("/predict", methods=["POST"])
+@app.route('/')
+def home():
+    """Health-check route to verify the backend is running."""
+    return "✅ Backend is running fine!"
+
+@app.route('/predict', methods=['POST'])
 def predict():
-    # Get file from request
-    file = request.files.get("file")
-    if not file:
-        return jsonify({"error": "No file provided"}), 400
+    """Handle image upload and return a random traffic sign prediction."""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
 
-    # Save the uploaded file temporarily
-    filepath = os.path.join("uploads", file.filename)
-    os.makedirs("uploads", exist_ok=True)
-    file.save(filepath)
+    uploaded_file = request.files['file']
+    # 🧠 mock prediction
+    return jsonify({
+        'label': 'Stop Sign',
+        'confidence': 0.92
+    })
 
-    # Placeholder prediction
-    result = {
-        "label": "Speed Limit 60",
-        "confidence": 0.92
-    }
-
-    # Optional cleanup
-    os.remove(filepath)
-
-    return jsonify(result), 200
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
