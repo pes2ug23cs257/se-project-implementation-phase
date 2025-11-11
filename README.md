@@ -26,3 +26,8 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python app.py
+```
+## 🧪 Testing & CI/CD
+- Run tests: `pytest -v`
+- Run lint: `pylint backend/app.py`
+- GitHub Actions automatically runs these checks on every pull request.
