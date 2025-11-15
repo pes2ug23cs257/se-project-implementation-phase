@@ -1,27 +1,12 @@
 """Flask backend for traffic sign recognition mock API."""
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from flask import Flask, jsonify, request
-app = Flask(__name__)
-
-@app.route("/predict", methods=["POST","GET"])
-def predict():
-    # Stubbed response to simulate ML model
-    return jsonify({"label": "Stop", "confidence": 0.95})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
-from flask import Flask, jsonify, request, make_response
 import os
+import random  # <-- ADDED for Day 6 random predictions
+from flask import Flask, jsonify, request, make_response
 
+# --- 1. App Initialization (Kept your single app definition) ---
 app = Flask(__name__)
 CORS(app)
-
-@app.route('/')
-def home():
-    """Health-check route to verify the backend is running."""
-    return "✅ Backend is running fine!"
+# --- 2. CORS Headers (Kept your manual @after_request headers) ---
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -29,38 +14,59 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     return response
 
-@app.route("/predict", methods=["POST", "OPTIONS"])  # Add OPTIONS method
+# --- 3. Health Check Route (Kept your home route) ---
+@app.route('/')
+def home():
+    """Health-check route to verify the backend is running."""
+    return "✅ Backend is running fine!"
+
+# --- 4. Prediction Route (Combined your functions + Added Day 6 logic) ---
+
+
+
+
+
+@app.route("/predict", methods=["POST", "OPTIONS"])
 def predict():
-    # Handle preflight request
+    """
+    Handles image upload and returns a random, realistic
+    mock traffic sign prediction (Implements US-021).
+    """
+    
+    # Handle preflight CORS request
     if request.method == "OPTIONS":
         response = make_response()
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add('Access-Control-Allow-Headers', "*")
         response.headers.add('Access-Control-Allow-Methods', "*")
         return response
-    
-    # Get file from request
+
+    # Handle POST request
     file = request.files.get("file")
     if not file:
         return jsonify({"error": "No file provided"}), 400
 
-    # Save the uploaded file temporarily
-    filepath = os.path.join("uploads", file.filename)
-    os.makedirs("uploads", exist_ok=True)
-    file.save(filepath)
+    # --- (SLIGHT CHANGE) Day 6 (US-021) Logic ---
+    # We don't need to save the file, just return the mock.
+    # This list makes your demo match the project title.
+    labels = [
+        "Stop Sign", 
+        "Speed Limit 40", 
+        "Speed Limit 60",
+        "No Entry", 
+        "Yield", 
+        "Turn Left", 
+        "Pedestrian Crossing"
+    ]
+    
+    result = {
+        "label": random.choice(labels),
+        "confidence": round(random.uniform(0.85, 0.99), 2)
+    }
+    # --- End of change ---
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    """Handle image upload and return a random traffic sign prediction."""
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file uploaded'}), 400
+    return jsonify(result), 200
 
-    uploaded_file = request.files['file']
-    # 🧠 mock prediction
-    return jsonify({
-        'label': 'Stop Sign',
-        'confidence': 0.92
-    })
-
+# --- 5. Run the App (Kept your final run command) ---
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
