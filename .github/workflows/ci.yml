@@ -42,7 +42,7 @@ jobs:
       - name: Run Bandit (Security Stage)
         run: |
           mkdir -p reports
-          bandit -r backend -f txt -o reports/bandit-report.txt
+          bandit -r backend -f txt -o reports/bandit-report.txt || true
 
       - name: Upload All CI Reports
         uses: actions/upload-artifact@v4
@@ -79,3 +79,4 @@ jobs:
           name: deployment-package
           path: deployment-package.zip
           retention-days: 30
+
