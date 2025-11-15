@@ -1,40 +1,81 @@
-name: CI Pipeline
+name: CI/CD (Build, Test, Lint, Coverage, Security, Deploy)
 
 on:
-  push:
-    branches:
-      - main
-      - 'feature/**'
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+  push:
+    branches: [ main ]
 
 jobs:
-  build:
+  test-pipeline:
     runs-on: ubuntu-latest
 
+    # THIS IS THE FIX for ModuleNotFoundError
+    env:
+      PYTHONPATH: .
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flask flask-cors pytest pylint requests
-        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+      - name: Install dependencies
+        run: |
+          pip install flask flask-cors pytest pylint
+          pip install pytest-cov bandit
 
-    - name: Run Pylint
-      run: |
-        pylint backend/app.py || true
+      - name: Run Pytest (Test Stage)
+        run: pytest -q
 
-    - name: Run Pytest
-      run: |
-        PYTHONPATH=. pytest -q || echo "Tests failed but continuing"
+      - name: Run Pylint (Lint Stage)
+        run: |
+          pylint backend/app.py --fail-under=7.5
 
-    - name: Verify workflow complete
-      run: echo "✅ CI pipeline finished successfully"
+      - name: Run Coverage (Coverage Stage)
+        run: |
+          pytest --cov=backend --cov-report=html --cov-report=term-missing --cov-fail-under=75
+
+      - name: Run Bandit (Security Stage)
+        run: |
+          mkdir -p reports
+          bandit -r backend -f txt -o reports/bandit-report.txt
+
+      - name: Upload All CI Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports
+          path: |
+            reports/bandit-report.txt
+            htmlcov/
+          retention-days: 7
+
+  deploy-artifact:
+    name: Create Deployment Artifact
+    needs: test-pipeline 
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download CI Reports
+        uses: actions/download-artifact@v4
+        with:
+          name: ci-reports
+          path: reports/
+
+      - name: Zip Deployment Artifact
+        run: |
+          zip -r deployment-package.zip . -x ".git/*" ".venv/*" ".vscode/*" "reports/*"
+          zip -r deployment-package.zip reports/
+
+      - name: Upload Final Deployment Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-package
+          path: deployment-package.zip
+          retention-days: 30
