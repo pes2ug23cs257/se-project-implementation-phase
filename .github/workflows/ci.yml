@@ -1,40 +1,93 @@
-name: CI Pipeline
+name: CI/CD (Build, Test, Lint, Coverage, Security, Deploy)
 
 on:
-  push:
-    branches:
-      - main
-      - 'feature/**'
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+  push:
+    branches: [ main ] # This allows the artifact job to run after merge
 
 jobs:
-  build:
+
+  test-pipeline:
     runs-on: ubuntu-latest
+    
+    # This single line fixes your "ModuleNotFoundError: No module named 'backend'"
+    env:
+      PYTHONPATH: .
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flask flask-cors pytest pylint requests
-        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+      - name: Install dependencies
+        run: |
+          pip install flask flask-cors pytest pylint
+          pip install pytest-cov bandit # <-- Added Coverage & Security tools
+          
+      - name: Run Pytest (Test Stage)
+        run: |
+          pytest -q
+          # This will now fail the job if tests fail (removed || echo)
+          
+      - name: Run Pylint (Lint Stage)
+        run: |
+          pylint backend/app.py --fail-under=7.5
+          # This will FAIL if your score (9.03) drops below 7.5
+          
+      - name: Run Coverage (Coverage Stage)
+        run: |
+          # This will FAIL if coverage is < 75% (Rubric requirement)
+          pytest --cov=backend --cov-report=html --cov-report=term-missing --cov-fail-under=75
+          
+      - name: Run Bandit (Security Stage)
+        run: |
+          mkdir -p reports # Create reports directory
+          bandit -r backend -f txt -o reports/bandit-report.txt
+          # We let this pass for now, as rubric just requires the scan to run
 
-    - name: Run Pylint
-      run: |
-        pylint backend/app.py || true
+      - name: Upload All CI Reports
+        # This saves the reports for the next job
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports
+          path: |
+            reports/bandit-report.txt
+            htmlcov/
+          retention-days: 7
 
-    - name: Run Pytest
-      run: |
-        PYTHONPATH=. pytest -q || echo "Tests failed but continuing"
 
-    - name: Verify workflow complete
-      run: echo "✅ CI pipeline finished successfully"
+  deploy-artifact:
+    name: Create Deployment Artifact
+    needs: test-pipeline # <-- Only runs if Job 1 succeeds
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' # <-- Only runs after merging to main
+    
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download CI Reports from Job 1
+        uses: actions/download-artifact@v4
+        with:
+          name: ci-reports
+          path: reports/ # Download reports into a 'reports' folder
+
+      - name: Zip Deployment Artifact
+        run: |
+          # 1. Zip all source code, ignoring Git/venv/reports
+          zip -r deployment-package.zip . -x ".git/*" ".venv/*" ".vscode/*" "reports/*"
+          # 2. Add the downloaded reports folder into the zip
+          zip -r deployment-package.zip reports/
+          
+      - name: Upload Final Deployment Artifact
+        # This is the final .zip file for submission
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-package
+          path: deployment-package.zip
+          retention-days: 30
