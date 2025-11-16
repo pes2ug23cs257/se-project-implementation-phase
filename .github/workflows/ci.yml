@@ -46,7 +46,8 @@ jobs:
 
       - name: Run Bandit (Security Stage)
         run: |
-          mkdir -p reports # Create reports directory
+          mkdir -p reports
+          
           # Add || true so it doesn't fail the build
           bandit -r backend -f txt -o reports/bandit-report.txt || true
 
@@ -90,3 +91,4 @@ jobs:
           name: deployment-package
           path: deployment-package.zip
           retention-days: 30
+
