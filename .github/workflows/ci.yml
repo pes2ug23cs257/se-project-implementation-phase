@@ -1,3 +1,4 @@
+name: CI (Build, Test, Lint, Coverage, Security)
 name: CI/CD (Build, Test, Lint, Coverage, Security, Deploy)
 
 on:
@@ -62,6 +63,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install flask flask-cors pytest pylint
+          pip install pytest-cov bandit  # <-- NEW TOOLS
+
+      - name: Run Pytest (Test Stage)
+        run: pytest -q
+
+      - name: Run Pylint (Lint Stage)
+        run: |
+          pylint backend/app.py --fail-under=7.5
+          # Your score is 9.03, so this will pass
+
+      - name: Run Coverage (Coverage Stage)
+        run: |
+          pytest --cov=backend --cov-report=html --cov-report=term
+          # This will run coverage and print a report
+          # We will add the 75% check tomorrow
+
+      - name: Run Bandit (Security Stage)
+        run: |
+          bandit -r backend/app.py -f txt -o reports/bandit-report.txt
+          # This runs bandit and saves the report
+
+      - name: Upload All Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports
+          path: |
+            reports/bandit-report.txt
+            htmlcov/
+          retention-days: 7
       - name: Download CI Reports
         uses: actions/download-artifact@v4
         with:
