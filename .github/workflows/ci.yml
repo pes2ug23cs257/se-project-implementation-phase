@@ -4,13 +4,16 @@ on:
   pull_request:
     branches: [ main ]
   push:
-    branches: [ main ]
+    branches: [ main ] # This allows the artifact job to run after merge
 
 jobs:
+  ##################################################
+  # JOB 1: RUN ALL TESTS AND QUALITY CHECKS
+  ##################################################
   test-pipeline:
     runs-on: ubuntu-latest
 
-    # THIS IS THE FIX for ModuleNotFoundError
+    # This FIXES the "ModuleNotFoundError: No module named 'backend'"
     env:
       PYTHONPATH: .
 
@@ -33,18 +36,23 @@ jobs:
 
       - name: Run Pylint (Lint Stage)
         run: |
+          # Fails if score < 7.5 (Rubric)
           pylint backend/app.py --fail-under=7.5
 
       - name: Run Coverage (Coverage Stage)
         run: |
+          # Fails if coverage < 75% (Rubric)
           pytest --cov=backend --cov-report=html --cov-report=term-missing --cov-fail-under=75
 
       - name: Run Bandit (Security Stage)
         run: |
           mkdir -p reports
+          
+          # Add || true so it doesn't fail the build
           bandit -r backend -f txt -o reports/bandit-report.txt || true
 
       - name: Upload All CI Reports
+        # This saves the reports for the next job
         uses: actions/upload-artifact@v4
         with:
           name: ci-reports
@@ -55,25 +63,29 @@ jobs:
 
   deploy-artifact:
     name: Create Deployment Artifact
-    needs: test-pipeline 
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test-pipeline # <-- Only runs if Job 1 succeeds
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' # <-- Only runs after merging to main
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download CI Reports
+      - name: Download CI Reports from Job 1
         uses: actions/download-artifact@v4
         with:
           name: ci-reports
-          path: reports/
+          path: reports/ # Download reports into a 'reports' folder
 
       - name: Zip Deployment Artifact
         run: |
+          # 1. Zip all source code, ignoring Git/venv/reports
           zip -r deployment-package.zip . -x ".git/*" ".venv/*" ".vscode/*" "reports/*"
+          # 2. Add the downloaded reports folder into the zip
           zip -r deployment-package.zip reports/
 
       - name: Upload Final Deployment Artifact
+        # This is the final .zip file for submission
         uses: actions/upload-artifact@v4
         with:
           name: deployment-package

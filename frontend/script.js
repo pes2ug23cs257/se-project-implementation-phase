@@ -1,5 +1,8 @@
+// ------------------------------
+// Developer: Jayani (US-002)
+// Task: Integrate Upload UI with Backend API (/predict)
+// ------------------------------
 
-// script.js
 document.getElementById('uploadBtn').addEventListener('click', async () => {
   const input = document.getElementById('imageInput');
   const result = document.getElementById('result');
@@ -33,6 +36,7 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
     });
 
     if (!response.ok) {
+      // ✅ Fixed this line – added backticks for proper template literal
       throw new Error(`Server returned ${response.status}`);
     }
 
@@ -49,9 +53,14 @@ document.getElementById('uploadBtn').addEventListener('click', async () => {
     }
 
   } catch (error) {
-    console.error('Error:', error);
-    result.innerText = '❌ Failed to get response from backend.';
+  console.error('Error:', error);
+  // This is the new validation block
+  if (error.message.includes('Failed to fetch')) {
+    result.innerText = '❌ Error: Backend server is not running. Please start Flask.';
+  } else {
+    result.innerText = `❌ Error: ${error.message}`;
   }
+}
 
   // Step 6: Optional debug message (for testing)
   console.log("✅ Upload & backend integration complete (US-002)");

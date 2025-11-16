@@ -2,10 +2,12 @@
 import os
 import random
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from flask_cors import CORS # <-- Make sure this is installed (pip install flask-cors)
 
 # --- 1. App Initialization ---
 app = Flask(__name__)
+CORS(app) 
 CORS(app) # <-- This one line handles all CORS and OPTIONS requests
 
 # --- 2. Health Check Route ---
@@ -25,6 +27,11 @@ def predict():
     file = request.files.get("file")
     if not file:
         return jsonify({"error": "No file provided"}), 400
+
+    labels = [
+        "Stop Sign", "Speed Limit 40", "Speed Limit 60",
+        "No Entry", "Yield", "Turn Left", "Pedestrian Crossing"
+    ]
 
     # --- Day 6 (US-021) Logic ---
     # This list makes your demo match the project title.
