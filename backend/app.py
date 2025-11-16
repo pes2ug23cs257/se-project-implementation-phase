@@ -13,7 +13,10 @@ def home():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-
+    """
+    Handles image upload and returns a random, realistic
+    mock traffic sign prediction.
+    """
     
     file = request.files.get("file")
     if not file:
