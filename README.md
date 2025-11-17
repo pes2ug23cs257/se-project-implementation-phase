@@ -12,8 +12,8 @@ The project was built using an Agile Scrum methodology over two, one-week sprint
 
 | Metric | Score | Rubric Requirement | Status |
 | :--- | :--- | :--- | :--- |
-| **Test Coverage** | **95.45%** | `>= 75%` | ✅ **Pass** |
-| **Lint Score** | **7.50 / 10** | `>= 7.5` | ✅ **Pass** |
+| **Test Coverage** | **86%%** | `>= 75%` | ✅ **Pass** |
+| **Lint Score** | **8.12 / 10** | `>= 7.5` | ✅ **Pass** |
 | **Security Scan** | **Pass** | `Scan must run` | ✅ **Pass** |
 | **Unit/Integration Tests**| **6 / 6 Passed** | `All tests pass` | ✅ **Pass** |
 | **CI/CD Pipeline** | **5 Stages + Artifact** | `All stages pass` | ✅ **Pass** |
